@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>豪華拍賣行 - 終極版</title>
+    <title>豪華拍賣行 - 絕對不捲動版</title>
     <style>
         :root {
             --velvet: #800020;
@@ -12,105 +12,111 @@
             --paper: #FDF5E6;
         }
 
-        body {
-            font-family: "PingFang HK", "Microsoft JhengHei", sans-serif;
+        /* 強制鎖定視窗，禁止捲動 */
+        html, body {
             margin: 0; padding: 0;
+            width: 100vw; height: 100vh;
+            overflow: hidden;
             background: var(--paper);
-            height: 100vh;
+            font-family: "PingFang HK", sans-serif;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
         /* ---------------- Setup ---------------- */
         #setup-screen {
-            position: fixed; inset: 0; background: white; z-index: 1000;
+            position: fixed; inset: 0; background: white; z-index: 9999;
             display: flex; align-items: center; justify-content: center;
         }
         .setup-box {
-            width: 80%; max-width: 500px; padding: 40px;
+            width: 80%; max-width: 400px; padding: 30px;
             border: 5px solid var(--gold); border-radius: 20px; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        /* ---------------- Header/Questions ---------------- */
+        /* ---------------- 上方題目區 (佔 25%) ---------------- */
         #top-panel {
+            height: 25vh;
             background: linear-gradient(to bottom, var(--velvet), #4a0012);
-            color: white; padding: 15px; border-bottom: 4px solid var(--gold);
-            text-align: center; flex-shrink: 0;
+            color: white; border-bottom: 4px solid var(--gold);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 0 20px; box-sizing: border-box; text-align: center;
         }
-        #q-text { font-size: 2rem; font-weight: bold; margin-bottom: 10px; min-height: 2.5rem; }
-        #q-ans { font-size: 1.5rem; color: var(--gold); margin-bottom: 10px; display: none; }
+        #q-text { font-size: 1.8rem; font-weight: bold; margin-bottom: 5px; overflow: hidden; }
+        #q-ans { font-size: 1.3rem; color: var(--gold); display: none; }
 
-        /* ---------------- Main Grid ---------------- */
-        #game-screen { display: none; flex: 1; flex-direction: column; padding: 10px; }
+        /* ---------------- 中間計分區 (核心自適應：佔 65%) ---------------- */
+        #game-screen {
+            height: 65vh;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+        }
         
         #participants-grid {
             display: grid;
-            gap: 10px;
-            flex: 1;
             width: 100%;
             height: 100%;
+            gap: 8px; /* 縮小間距以節省空間 */
         }
 
         .card {
-            background: white; border: 3px solid var(--wood); border-radius: 12px;
+            background: white; border: 2px solid var(--wood); border-radius: 10px;
             display: flex; flex-direction: column; justify-content: space-between;
-            padding: 8px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            padding: 4px; box-sizing: border-box; overflow: hidden;
         }
-        .card-name { font-size: 1.2rem; font-weight: bold; color: var(--wood); text-align: center; border-bottom: 1px solid #ddd; }
-        .card-coins { font-size: 2.2rem; font-weight: bold; color: var(--velvet); text-align: center; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .coin-icon::before { content: "💰"; font-size: 1.8rem; }
+        .card-name { font-weight: bold; color: var(--wood); text-align: center; border-bottom: 1px solid #eee; }
+        .card-coins { font-weight: bold; color: var(--velvet); text-align: center; display: flex; align-items: center; justify-content: center; gap: 3px; }
         
-        .btn-row { display: flex; gap: 5px; }
-        .btn-action { flex: 1; padding: 10px 0; border: none; border-radius: 5px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
-        .btn-plus { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; }
-        .btn-minus { background: var(--velvet); color: white; width: 100%; margin-top: 5px; }
+        .btn-row { display: flex; gap: 3px; height: 35%; }
+        .btn-action { flex: 1; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-plus { background: #E8F5E9; color: #2E7D32; font-size: 0.9rem; }
+        .btn-minus { background: var(--velvet); color: white; width: 100%; height: 30%; font-size: 0.8rem; margin-top: 2px; }
 
-        /* ---------------- Footer ---------------- */
-        footer { height: 70px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; background: #eee; flex-shrink: 0; }
+        /* ---------------- 底部工具列 (佔 10%) ---------------- */
+        footer {
+            height: 10vh;
+            background: #ddd; border-top: 2px solid #bbb;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; box-sizing: border-box;
+        }
         
-        .btn-main { padding: 15px 30px; font-size: 1.2rem; font-weight: bold; border-radius: 10px; cursor: pointer; border: none; }
+        .btn-main { padding: 10px 20px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
         .btn-gold { background: var(--gold); color: var(--wood); }
         .btn-next { background: var(--velvet); color: white; }
         .btn-end { background: #333; color: white; }
 
-        /* ---------------- Summary ---------------- */
+        /* ---------------- 結算畫面 ---------------- */
         #summary-screen {
-            position: fixed; inset: 0; background: var(--paper); z-index: 2000;
-            display: none; padding: 40px; overflow-y: auto;
+            position: fixed; inset: 0; background: var(--paper); z-index: 9999;
+            display: none; padding: 20px; overflow-y: auto;
         }
-        .summary-content { max-width: 800px; margin: 0 auto; }
-        .sec { margin-bottom: 30px; padding: 20px; background: white; border-radius: 15px; border: 2px solid var(--gold); }
-        .sec h2 { color: var(--velvet); border-bottom: 2px solid var(--velvet); padding-bottom: 10px; }
-        .rank-item { font-size: 1.5rem; padding: 10px; display: flex; justify-content: space-between; }
-        .bankrupt { color: red; font-weight: bold; }
-        .stagnant { color: #666; }
+        .sec { margin-bottom: 20px; padding: 15px; background: white; border-radius: 10px; border: 2px solid var(--gold); }
+        .rank-item { font-size: 1.4rem; border-bottom: 1px dashed #ccc; padding: 5px 0; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
 
 <div id="setup-screen">
     <div class="setup-box">
-        <h1 style="color:var(--velvet)">拍賣行初始化</h1>
+        <h1 style="color:var(--velvet); font-size: 2rem;">拍賣行控制台</h1>
         <div style="margin: 20px 0; text-align: left; font-size: 1.2rem;">
             <p>模式：
-                <button onclick="setMode('group')" id="m1" class="btn-main" style="padding:10px 20px">分組</button>
-                <button onclick="setMode('individual')" id="m2" class="btn-main btn-gold" style="padding:10px 20px">個人</button>
+                <button onclick="setMode('group')" id="m1" class="btn-main" style="padding:5px 15px">分組</button>
+                <button onclick="setMode('individual')" id="m2" class="btn-main btn-gold" style="padding:5px 15px">個人</button>
             </p>
-            <p>數量：<input type="number" id="count-in" value="6" style="font-size:1.5rem; width:80px"></p>
-            <p>初始金幣：<input type="number" id="coin-in" value="10" style="font-size:1.5rem; width:80px"></p>
-            <p><label><input type="checkbox" id="q-toggle" checked> 顯示題目</label></p>
+            <p>數量：<input type="number" id="count-in" value="6" style="width:60px"></p>
+            <p>初始金幣：<input type="number" id="coin-in" value="10" style="width:60px"></p>
+            <p><label><input type="checkbox" id="q-toggle" checked> 顯示題目區域</label></p>
         </div>
-        <button class="btn-main btn-next" style="width:100%" onclick="initGame()">開始教學</button>
+        <button class="btn-main btn-next" style="width:100%; padding: 15px;" onclick="initGame()">進入拍賣大廳</button>
     </div>
 </div>
 
 <div id="top-panel">
-    <div id="q-text">請點擊下一題開始</div>
+    <div id="q-text">請準備開始...</div>
     <div id="q-ans"></div>
-    <div id="q-btns">
-        <button class="btn-main btn-gold" style="padding:5px 20px" onclick="showAns()">公佈答案</button>
+    <div style="margin-top: 10px;">
+        <button class="btn-main btn-gold" style="font-size:0.9rem; padding: 5px 15px;" onclick="showAns()">公佈答案</button>
     </div>
 </div>
 
@@ -119,36 +125,19 @@
 </div>
 
 <footer>
-    <button class="btn-main btn-end" onclick="endGame()">結束並結算</button>
-    <div id="q-num" style="font-size:1.5rem; font-weight:bold; color:var(--velvet)"></div>
+    <button class="btn-main btn-end" onclick="endGame()">結束結算</button>
+    <div id="q-num" style="font-size:1.2rem; font-weight:bold; color:var(--velvet)">題目 0/17</div>
     <button class="btn-main btn-next" onclick="nextQ()">下一題</button>
 </footer>
 
 <div id="summary-screen">
-    <div class="summary-content">
-        <h1 style="text-align:center; color:var(--velvet); font-size: 3rem;">拍賣會結算清單</h1>
-        
-        <div class="sec">
-            <h2>🏆 最高資產 (前三名)</h2>
-            <div id="res-top"></div>
-        </div>
-
-        <div class="sec">
-            <h2>⚖️ 資產無變動者</h2>
-            <div id="res-stay"></div>
-        </div>
-
-        <div class="sec">
-            <h2>💸 破產名單</h2>
-            <div id="res-broke"></div>
-        </div>
-
-        <div class="sec">
-            <h2>📜 本日拍賣題目總結</h2>
-            <div id="res-qs" style="line-height: 1.8;"></div>
-        </div>
-
-        <button class="btn-main btn-next" style="display:block; margin: 0 auto;" onclick="location.reload()">重新開始</button>
+    <div style="max-width: 700px; margin: 0 auto;">
+        <h1 style="text-align:center; color:var(--velvet);">拍賣結算</h1>
+        <div class="sec"><h2>🏆 前三名</h2><div id="res-top"></div></div>
+        <div class="sec"><h2>⚖️ 佛系名單 (無變動)</h2><div id="res-stay" style="font-size: 1.2rem;"></div></div>
+        <div class="sec"><h2>💸 破產名單</h2><div id="res-broke" style="font-size: 1.2rem; color: red;"></div></div>
+        <div class="sec"><h2>📜 回答紀錄</h2><div id="res-qs" style="font-size: 0.9rem; max-height: 200px; overflow-y: scroll;"></div></div>
+        <button class="btn-main btn-next" style="width:100%" onclick="location.reload()">重新開始</button>
     </div>
 </div>
 
@@ -160,23 +149,23 @@
     let usedQs = [];
 
     const db = [
-        { q: "「老師，我想去洗手間，我好急。」", a: "贗品（錯誤）。糾正：應說「我憋不住了」。" },
+        { q: "「老師，我想去洗手間，我好急。」", a: "贗品。糾正：應說「我憋不住了」。" },
         { q: "「這件衣服質量很好，但是價格有點貴。」", a: "真品（正確）。" },
-        { q: "「你先走，我走多一陣就來。」", a: "贗品（錯誤）。糾正：應說「我再走一會兒就來」。" },
+        { q: "「你先走，我走多一陣就來。」", a: "贗品。糾正：應說「我再走一會兒就來」。" },
         { q: "「這個計畫（jì huà）非常完美。」", a: "真品（正確）。" },
         { q: "「請大家保持安靜（ān jìng）。」", a: "真品（正確）。" },
         { q: "「這部手機質量很好。」", a: "真品（正確）。" },
-        { q: "「他在學校門口等緊你。」", a: "贗品（錯誤）。糾正：應說「他在學校門口等著你呢」。" },
+        { q: "「他在學校門口等緊你。」", a: "贗品。糾正：應說「他在學校門口等著你呢」。" },
         { q: "粵：「你有冇搞錯呀？」→ 譯：「你有沒有弄錯？」", a: "贗品。地道翻譯：「你沒事吧？」" },
         { q: "粵：「我行開一陣。」→ 譯：「我走開一會兒。」", a: "贗品。地道翻譯：「我離開一下。」" },
         { q: "粵：「佢呢個人好錫老婆。」→ 譯：「他這個人很疼老婆。」", a: "真品（正確）。" },
         { q: "粵：「你唔好亂噏啦！」→ 譯：「你不要亂吸啊！」", a: "贗品。地道翻譯：「你別瞎說！」" },
         { q: "粵：「真係大整蠱！」→ 譯：「真是太坑人了！」", a: "真品（正確地道）。" },
         { q: "粵：「大家咁話。」→ 譯：「大家都這麼說。」", a: "贗品。地道翻譯：「彼此彼此」。" },
-        { q: "粵：「佢份人好生性。」→ 譯：「他這個人天性很好。」", a: "贗品。地道翻譯：「他這個人很懂事」。" },
+        { q: "粵：「佢份人好生性。」→ 譯：「他這個人很懂事。」", a: "贗品。譯：很懂事。" },
         { q: "粵：「你唔好『水』我喎！」→ 譯：「你別忽悠我啊！」", a: "真品（正確）。" },
-        { q: "粵：「今次真係『大鑊』喇！」→ 譯：「這次真的是大鍋了！」", a: "贗品。地道翻譯：「這下可糟了」。" },
-        { q: "粵：「佢講嘢好『骨』。」→ 譯：「他說話很硬。」", a: "贗品。地道翻譯：「他說話帶刺」。" }
+        { q: "粵：「今次真係『大鑊』喇！」→ 譯：「這次真的是大鍋了！」", a: "贗品。譯：這下糟了。" },
+        { q: "粵：「佢講嘢好『骨』。」→ 譯：「他說話很硬。」", a: "贗品。譯：說話帶刺。" }
     ].sort(() => Math.random() - 0.5);
 
     function setMode(m) {
@@ -188,40 +177,49 @@
     function initGame() {
         const count = parseInt(document.getElementById('count-in').value);
         startCoins = parseInt(document.getElementById('coin-in').value);
-        for(let i=1; i<=count; i++) {
-            participants.push({ id: i, coins: startCoins });
-        }
+        for(let i=1; i<=count; i++) participants.push({ id: i, coins: startCoins });
 
         if(!document.getElementById('q-toggle').checked) {
             document.getElementById('top-panel').style.display = 'none';
+            document.getElementById('game-screen').style.height = '90vh';
         }
 
         document.getElementById('setup-screen').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'flex';
         renderGrid();
     }
 
     function renderGrid() {
         const grid = document.getElementById('participants-grid');
         grid.innerHTML = '';
-        const count = participants.length;
+        const n = participants.length;
         
-        // 智能計算行列
-        let cols = count <= 6 ? 3 : (count <= 12 ? 4 : (count <= 20 ? 5 : 6));
+        // 根據人數動態決定行列
+        let cols, rows;
+        if (n <= 6) { cols = 3; rows = 2; }
+        else if (n <= 12) { cols = 4; rows = 3; }
+        else if (n <= 20) { cols = 5; rows = 4; }
+        else if (n <= 30) { cols = 6; rows = 5; }
+        else { cols = 8; rows = Math.ceil(n/8); }
+
         grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+        // 動態計算字體大小
+        let nameSize = n > 20 ? "0.8rem" : "1.2rem";
+        let coinSize = n > 20 ? "1.2rem" : "2.2rem";
 
         participants.forEach((p, idx) => {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <div class="card-name">${mode === 'group' ? '第'+p.id+'組' : p.id+'號'}</div>
-                <div class="card-coins"><span class="coin-icon"></span> ${p.coins}</div>
-                <div>
+                <div class="card-name" style="font-size:${nameSize}">${mode === 'group' ? '第'+p.id+'組' : p.id+'號'}</div>
+                <div class="card-coins" style="font-size:${coinSize}">💰${p.coins}</div>
+                <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end;">
                     <div class="btn-row">
                         <button class="btn-action btn-plus" onclick="mod(${idx}, 5)">+5</button>
                         <button class="btn-action btn-plus" onclick="mod(${idx}, 10)">+10</button>
                     </div>
-                    <button class="btn-action btn-minus" onclick="mod(${idx}, -1)">扣除 1 金幣</button>
+                    <button class="btn-action btn-minus" onclick="mod(${idx}, -1)">-1</button>
                 </div>
             `;
             grid.appendChild(card);
@@ -240,42 +238,31 @@
             document.getElementById('q-ans').style.display = 'none';
             document.getElementById('q-num').innerText = `題目: ${currentQ + 1} / ${db.length}`;
             usedQs.push(db[currentQ]);
-        } else {
-            document.getElementById('q-text').innerText = "拍賣品已全部售罄";
         }
     }
 
     function showAns() {
         if(currentQ >= 0) {
-            document.getElementById('q-ans').innerText = "【解答】" + db[currentQ].a;
+            document.getElementById('q-ans').innerText = db[currentQ].a;
             document.getElementById('q-ans').style.display = 'block';
         }
     }
 
     function endGame() {
         document.getElementById('summary-screen').style.display = 'block';
-        
-        // 1. 最高分前三
         let sorted = [...participants].sort((a,b) => b.coins - a.coins);
-        let top3 = sorted.slice(0, 3);
-        let topHTML = "";
-        top3.forEach((p, i) => {
-            topHTML += `<div class="rank-item"><span>第 ${i+1} 名: ${mode==='group'?'組別':'編號'} ${p.id}</span> <span>💰 ${p.coins}</span></div>`;
-        });
-        document.getElementById('res-top').innerHTML = topHTML;
+        
+        document.getElementById('res-top').innerHTML = sorted.slice(0, 3).map((p, i) => 
+            `<div class="rank-item"><span>${i+1}. ${mode==='group'?'組別':'編號'} ${p.id}</span> <span>💰 ${p.coins}</span></div>`).join('');
 
-        // 2. 分數無變動
-        let stay = participants.filter(p => p.coins === startCoins);
-        document.getElementById('res-stay').innerHTML = stay.length ? stay.map(p => (mode==='group'?'組別':'編號')+p.id).join(', ') : '無';
+        let stay = participants.filter(p => p.coins === startCoins).map(p => p.id);
+        document.getElementById('res-stay').innerText = stay.length ? stay.join(', ') : '無';
 
-        // 3. 破產
-        let broke = participants.filter(p => p.coins <= 0);
-        document.getElementById('res-broke').innerHTML = broke.length ? broke.map(p => `<span class="bankrupt">${(mode==='group'?'組別':'編號')+p.id}</span>`).join(', ') : '暫無破產者';
+        let broke = participants.filter(p => p.coins <= 0).map(p => p.id);
+        document.getElementById('res-broke').innerText = broke.length ? broke.join(', ') : '無';
 
-        // 4. 題目
-        document.getElementById('res-qs').innerHTML = usedQs.map((item, i) => `<b>${i+1}.</b> ${item.q}<br><small style="color:green">${item.a}</small><br>`).join('<hr>');
+        document.getElementById('res-qs').innerHTML = usedQs.map((it, i) => `${i+1}. ${it.q}<br>👉 ${it.a}`).join('<hr>');
     }
 </script>
-
 </body>
 </html>
