@@ -3,22 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>豪華拍賣行 - 絕對不捲動版</title>
+    <title>豪華拍賣行 - 完美滿版</title>
     <style>
         :root {
             --velvet: #800020;
-            --gold: #FFD700;
-            --wood: #5C4033;
-            --paper: #FDF5E6;
+            --gold: #D4AF37;
+            --wood: #4A2C2A;
+            --marble: #FDFBF7;
         }
 
-        /* 強制鎖定視窗，禁止捲動 */
+        /* 全局防呆設定：禁止雙擊放大、禁止反白選取 */
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation; /* 解決 iPad 雙擊放大的關鍵 */
+            user-select: none; 
+            -webkit-user-select: none;
+        }
+
+        /* 鎖定全螢幕 100vh */
         html, body {
             margin: 0; padding: 0;
             width: 100vw; height: 100vh;
             overflow: hidden;
-            background: var(--paper);
-            font-family: "PingFang HK", sans-serif;
+            background-color: var(--marble);
+            font-family: "PingFang HK", "Microsoft JhengHei", sans-serif;
             display: flex;
             flex-direction: column;
         }
@@ -29,94 +37,115 @@
             display: flex; align-items: center; justify-content: center;
         }
         .setup-box {
-            width: 80%; max-width: 400px; padding: 30px;
-            border: 5px solid var(--gold); border-radius: 20px; text-align: center;
+            width: 90%; max-width: 450px; padding: 30px;
+            border: 4px solid var(--gold); border-radius: 15px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
+        .setup-row { margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: bold;}
+        .setup-input { width: 80px; font-size: 1.5rem; text-align: center; border: 2px solid var(--gold); border-radius: 5px; color: var(--velvet); font-weight: bold;}
 
-        /* ---------------- 上方題目區 (佔 25%) ---------------- */
+        /* ---------------- 上方題目與控制區 (自適應高度) ---------------- */
         #top-panel {
-            height: 25vh;
-            background: linear-gradient(to bottom, var(--velvet), #4a0012);
+            background: linear-gradient(to bottom, var(--velvet), #5a0016);
             color: white; border-bottom: 4px solid var(--gold);
+            padding: 10px; text-align: center;
+            flex-shrink: 0; /* 確保題目區不會被壓縮消失 */
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 0 20px; box-sizing: border-box; text-align: center;
         }
-        #q-text { font-size: 1.8rem; font-weight: bold; margin-bottom: 5px; overflow: hidden; }
-        #q-ans { font-size: 1.3rem; color: var(--gold); display: none; }
+        
+        #q-text { font-size: 1.8rem; font-weight: bold; margin-bottom: 5px; line-height: 1.3; }
+        #q-ans { font-size: 1.4rem; color: var(--gold); margin-bottom: 10px; display: none; font-weight: bold; }
+        
+        /* 統一放在題目下方的按鈕列 */
+        .top-controls {
+            display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; width: 100%;
+        }
 
-        /* ---------------- 中間計分區 (核心自適應：佔 65%) ---------------- */
+        .btn {
+            padding: 8px 15px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;
+            box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+        }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+        .btn-gold { background: var(--gold); color: var(--wood); }
+        .btn-light { background: white; color: var(--velvet); }
+        .btn-dark { background: #333; color: white; }
+
+        /* ---------------- 主計分區 (佔滿剩餘空間) ---------------- */
         #game-screen {
-            height: 65vh;
-            padding: 10px;
-            box-sizing: border-box;
+            flex-grow: 1; /* 佔據所有剩下的空間 */
+            padding: 8px;
             display: flex;
+            overflow: hidden;
         }
         
         #participants-grid {
-            display: grid;
-            width: 100%;
-            height: 100%;
-            gap: 8px; /* 縮小間距以節省空間 */
+            display: grid; width: 100%; height: 100%; gap: 6px;
         }
 
         .card {
-            background: white; border: 2px solid var(--wood); border-radius: 10px;
+            background: white; border: 2px solid var(--wood); border-radius: 8px;
             display: flex; flex-direction: column; justify-content: space-between;
-            padding: 4px; box-sizing: border-box; overflow: hidden;
+            padding: 4px; overflow: hidden; box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
         }
-        .card-name { font-weight: bold; color: var(--wood); text-align: center; border-bottom: 1px solid #eee; }
-        .card-coins { font-weight: bold; color: var(--velvet); text-align: center; display: flex; align-items: center; justify-content: center; gap: 3px; }
+        .card-name { font-weight: bold; color: var(--wood); text-align: center; border-bottom: 1px solid #eee; padding-bottom: 2px;}
+        .card-coins { font-weight: bold; color: var(--velvet); text-align: center; display: flex; align-items: center; justify-content: center; gap: 5px; flex-grow: 1;}
         
-        .btn-row { display: flex; gap: 3px; height: 35%; }
-        .btn-action { flex: 1; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-plus { background: #E8F5E9; color: #2E7D32; font-size: 0.9rem; }
-        .btn-minus { background: var(--velvet); color: white; width: 100%; height: 30%; font-size: 0.8rem; margin-top: 2px; }
-
-        /* ---------------- 底部工具列 (佔 10%) ---------------- */
-        footer {
-            height: 10vh;
-            background: #ddd; border-top: 2px solid #bbb;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px; box-sizing: border-box;
+        .btn-row { display: flex; gap: 4px; height: 35px; margin-bottom: 4px;}
+        .btn-action { 
+            flex: 1; border: 1px solid rgba(0,0,0,0.1); border-radius: 5px; font-weight: bold; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
         }
+        .btn-plus { background: #E8F5E9; color: #2E7D32; }
+        .btn-minus { background: var(--velvet); color: white; width: 100%; height: 30px; font-size: 0.9rem; }
         
-        .btn-main { padding: 10px 20px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
-        .btn-gold { background: var(--gold); color: var(--wood); }
-        .btn-next { background: var(--velvet); color: white; }
-        .btn-end { background: #333; color: white; }
+        .btn-action:active { filter: brightness(0.9); }
 
         /* ---------------- 結算畫面 ---------------- */
         #summary-screen {
-            position: fixed; inset: 0; background: var(--paper); z-index: 9999;
+            position: fixed; inset: 0; background: var(--marble); z-index: 9999;
             display: none; padding: 20px; overflow-y: auto;
         }
-        .sec { margin-bottom: 20px; padding: 15px; background: white; border-radius: 10px; border: 2px solid var(--gold); }
-        .rank-item { font-size: 1.4rem; border-bottom: 1px dashed #ccc; padding: 5px 0; display: flex; justify-content: space-between; }
+        .sec { margin-bottom: 15px; padding: 15px; background: white; border-radius: 10px; border: 2px solid var(--gold); }
+        .rank-item { font-size: 1.3rem; border-bottom: 1px dashed #ccc; padding: 8px 0; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
 
 <div id="setup-screen">
     <div class="setup-box">
-        <h1 style="color:var(--velvet); font-size: 2rem;">拍賣行控制台</h1>
-        <div style="margin: 20px 0; text-align: left; font-size: 1.2rem;">
-            <p>模式：
-                <button onclick="setMode('group')" id="m1" class="btn-main" style="padding:5px 15px">分組</button>
-                <button onclick="setMode('individual')" id="m2" class="btn-main btn-gold" style="padding:5px 15px">個人</button>
-            </p>
-            <p>數量：<input type="number" id="count-in" value="6" style="width:60px"></p>
-            <p>初始金幣：<input type="number" id="coin-in" value="10" style="width:60px"></p>
-            <p><label><input type="checkbox" id="q-toggle" checked> 顯示題目區域</label></p>
+        <h1 style="color:var(--velvet); margin-top:0;">拍賣行設定</h1>
+        <div class="setup-row">
+            <span>模式：</span>
+            <div>
+                <button onclick="setMode('group')" id="m1" class="btn btn-gold">分組</button>
+                <button onclick="setMode('individual')" id="m2" class="btn btn-light" style="border: 1px solid #ccc;">個人</button>
+            </div>
         </div>
-        <button class="btn-main btn-next" style="width:100%; padding: 15px;" onclick="initGame()">進入拍賣大廳</button>
+        <div class="setup-row">
+            <span>數量：</span>
+            <input type="number" id="count-in" class="setup-input" value="6" min="1" max="42">
+        </div>
+        <div class="setup-row">
+            <span>起始金幣：</span>
+            <input type="number" id="coin-in" class="setup-input" value="10" min="0">
+        </div>
+        <div class="setup-row" style="justify-content: center;">
+            <label style="cursor:pointer;"><input type="checkbox" id="q-toggle" checked style="transform: scale(1.5); margin-right: 10px;"> 顯示題目區域</label>
+        </div>
+        <button class="btn btn-gold" style="width:100%; font-size: 1.3rem; padding: 12px; margin-top:10px;" onclick="initGame()">進入拍賣大廳</button>
     </div>
 </div>
 
 <div id="top-panel">
-    <div id="q-text">請準備開始...</div>
-    <div id="q-ans"></div>
-    <div style="margin-top: 10px;">
-        <button class="btn-main btn-gold" style="font-size:0.9rem; padding: 5px 15px;" onclick="showAns()">公佈答案</button>
+    <div id="q-area">
+        <div id="q-text">準備開始...</div>
+        <div id="q-ans"></div>
+    </div>
+    
+    <div class="top-controls">
+        <button id="btn-ans" class="btn btn-gold" onclick="showAns()">公佈答案</button>
+        <button id="btn-next" class="btn btn-light" onclick="nextQ()">下一題 <span id="q-num" style="font-size:0.9rem; color:#888;">(0/17)</span></button>
+        <button class="btn btn-dark" onclick="endGame()">結束結算</button>
     </div>
 </div>
 
@@ -124,43 +153,38 @@
     <div id="participants-grid"></div>
 </div>
 
-<footer>
-    <button class="btn-main btn-end" onclick="endGame()">結束結算</button>
-    <div id="q-num" style="font-size:1.2rem; font-weight:bold; color:var(--velvet)">題目 0/17</div>
-    <button class="btn-main btn-next" onclick="nextQ()">下一題</button>
-</footer>
-
 <div id="summary-screen">
     <div style="max-width: 700px; margin: 0 auto;">
-        <h1 style="text-align:center; color:var(--velvet);">拍賣結算</h1>
-        <div class="sec"><h2>🏆 前三名</h2><div id="res-top"></div></div>
-        <div class="sec"><h2>⚖️ 佛系名單 (無變動)</h2><div id="res-stay" style="font-size: 1.2rem;"></div></div>
-        <div class="sec"><h2>💸 破產名單</h2><div id="res-broke" style="font-size: 1.2rem; color: red;"></div></div>
-        <div class="sec"><h2>📜 回答紀錄</h2><div id="res-qs" style="font-size: 0.9rem; max-height: 200px; overflow-y: scroll;"></div></div>
-        <button class="btn-main btn-next" style="width:100%" onclick="location.reload()">重新開始</button>
+        <h1 style="text-align:center; color:var(--velvet);">拍賣結算報告</h1>
+        <div class="sec"><h2>🏆 最終排行榜 (前三名)</h2><div id="res-top"></div></div>
+        <div class="sec"><h2>⚖️ 資產無變動者</h2><div id="res-stay" style="font-size: 1.2rem; color: #555;"></div></div>
+        <div class="sec"><h2>💸 破產名單</h2><div id="res-broke" style="font-size: 1.2rem; color: red; font-weight: bold;"></div></div>
+        <div class="sec"><h2>📜 本日題目總結</h2><div id="res-qs" style="font-size: 1rem; line-height: 1.6;"></div></div>
+        <button class="btn btn-gold" style="width:100%; padding: 15px; font-size: 1.2rem;" onclick="location.reload()">重新開始新局</button>
     </div>
 </div>
 
 <script>
     let participants = [];
     let startCoins = 10;
-    let mode = 'individual';
+    let mode = 'group';
     let currentQ = -1;
     let usedQs = [];
+    let showQ = true;
 
     const db = [
         { q: "「老師，我想去洗手間，我好急。」", a: "贗品。糾正：應說「我憋不住了」。" },
         { q: "「這件衣服質量很好，但是價格有點貴。」", a: "真品（正確）。" },
         { q: "「你先走，我走多一陣就來。」", a: "贗品。糾正：應說「我再走一會兒就來」。" },
-        { q: "「這個計畫（jì huà）非常完美。」", a: "真品（正確）。" },
-        { q: "「請大家保持安靜（ān jìng）。」", a: "真品（正確）。" },
+        { q: "「這個計畫非常完美。」", a: "真品（正確）。" },
+        { q: "「請大家保持安靜。」", a: "真品（正確）。" },
         { q: "「這部手機質量很好。」", a: "真品（正確）。" },
         { q: "「他在學校門口等緊你。」", a: "贗品。糾正：應說「他在學校門口等著你呢」。" },
         { q: "粵：「你有冇搞錯呀？」→ 譯：「你有沒有弄錯？」", a: "贗品。地道翻譯：「你沒事吧？」" },
         { q: "粵：「我行開一陣。」→ 譯：「我走開一會兒。」", a: "贗品。地道翻譯：「我離開一下。」" },
         { q: "粵：「佢呢個人好錫老婆。」→ 譯：「他這個人很疼老婆。」", a: "真品（正確）。" },
         { q: "粵：「你唔好亂噏啦！」→ 譯：「你不要亂吸啊！」", a: "贗品。地道翻譯：「你別瞎說！」" },
-        { q: "粵：「真係大整蠱！」→ 譯：「真是太坑人了！」", a: "真品（正確地道）。" },
+        { q: "粵：「真係大整蠱！」→ 譯：「真是太坑人了！」", a: "真品（正確）。" },
         { q: "粵：「大家咁話。」→ 譯：「大家都這麼說。」", a: "贗品。地道翻譯：「彼此彼此」。" },
         { q: "粵：「佢份人好生性。」→ 譯：「他這個人很懂事。」", a: "贗品。譯：很懂事。" },
         { q: "粵：「你唔好『水』我喎！」→ 譯：「你別忽悠我啊！」", a: "真品（正確）。" },
@@ -170,18 +194,23 @@
 
     function setMode(m) {
         mode = m;
-        document.getElementById('m1').className = m === 'group' ? 'btn-main btn-gold' : 'btn-main';
-        document.getElementById('m2').className = m === 'individual' ? 'btn-main btn-gold' : 'btn-main';
+        document.getElementById('m1').className = m === 'group' ? 'btn btn-gold' : 'btn btn-light';
+        document.getElementById('m2').className = m === 'individual' ? 'btn btn-gold' : 'btn btn-light';
+        if(m === 'individual') document.getElementById('m1').style.border = "1px solid #ccc";
     }
 
     function initGame() {
         const count = parseInt(document.getElementById('count-in').value);
         startCoins = parseInt(document.getElementById('coin-in').value);
+        showQ = document.getElementById('q-toggle').checked;
+
         for(let i=1; i<=count; i++) participants.push({ id: i, coins: startCoins });
 
-        if(!document.getElementById('q-toggle').checked) {
-            document.getElementById('top-panel').style.display = 'none';
-            document.getElementById('game-screen').style.height = '90vh';
+        // 如果不顯示題目，隱藏題目文字區塊，但保留結束按鈕
+        if(!showQ) {
+            document.getElementById('q-area').style.display = 'none';
+            document.getElementById('btn-ans').style.display = 'none';
+            document.getElementById('btn-next').style.display = 'none';
         }
 
         document.getElementById('setup-screen').style.display = 'none';
@@ -193,33 +222,33 @@
         grid.innerHTML = '';
         const n = participants.length;
         
-        // 根據人數動態決定行列
+        // 智能計算行列 (完美撐滿畫面)
         let cols, rows;
         if (n <= 6) { cols = 3; rows = 2; }
         else if (n <= 12) { cols = 4; rows = 3; }
         else if (n <= 20) { cols = 5; rows = 4; }
         else if (n <= 30) { cols = 6; rows = 5; }
-        else { cols = 8; rows = Math.ceil(n/8); }
+        else { cols = 7; rows = Math.ceil(n/7); }
 
         grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
         grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
-        // 動態計算字體大小
-        let nameSize = n > 20 ? "0.8rem" : "1.2rem";
-        let coinSize = n > 20 ? "1.2rem" : "2.2rem";
+        // 依據數量調整字體
+        let nameSize = n > 20 ? "0.9rem" : "1.2rem";
+        let coinSize = n > 20 ? "1.5rem" : "2.5rem";
 
         participants.forEach((p, idx) => {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
                 <div class="card-name" style="font-size:${nameSize}">${mode === 'group' ? '第'+p.id+'組' : p.id+'號'}</div>
-                <div class="card-coins" style="font-size:${coinSize}">💰${p.coins}</div>
-                <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end;">
+                <div class="card-coins" style="font-size:${coinSize}">💰 ${p.coins}</div>
+                <div>
                     <div class="btn-row">
                         <button class="btn-action btn-plus" onclick="mod(${idx}, 5)">+5</button>
                         <button class="btn-action btn-plus" onclick="mod(${idx}, 10)">+10</button>
                     </div>
-                    <button class="btn-action btn-minus" onclick="mod(${idx}, -1)">-1</button>
+                    <button class="btn-action btn-minus" onclick="mod(${idx}, -1)">扣 1 幣</button>
                 </div>
             `;
             grid.appendChild(card);
@@ -236,32 +265,37 @@
         if(currentQ < db.length) {
             document.getElementById('q-text').innerText = db[currentQ].q;
             document.getElementById('q-ans').style.display = 'none';
-            document.getElementById('q-num').innerText = `題目: ${currentQ + 1} / ${db.length}`;
+            document.getElementById('q-num').innerText = `(${currentQ + 1}/${db.length})`;
             usedQs.push(db[currentQ]);
+        } else {
+            document.getElementById('q-text').innerText = "拍賣品已全部售罄";
+            document.getElementById('btn-next').disabled = true;
         }
     }
 
     function showAns() {
-        if(currentQ >= 0) {
+        if(currentQ >= 0 && currentQ < db.length) {
             document.getElementById('q-ans').innerText = db[currentQ].a;
             document.getElementById('q-ans').style.display = 'block';
         }
     }
 
     function endGame() {
-        document.getElementById('summary-screen').style.display = 'block';
-        let sorted = [...participants].sort((a,b) => b.coins - a.coins);
-        
-        document.getElementById('res-top').innerHTML = sorted.slice(0, 3).map((p, i) => 
-            `<div class="rank-item"><span>${i+1}. ${mode==='group'?'組別':'編號'} ${p.id}</span> <span>💰 ${p.coins}</span></div>`).join('');
+        if(confirm("確定要結束拍賣並結算嗎？")) {
+            document.getElementById('summary-screen').style.display = 'block';
+            let sorted = [...participants].sort((a,b) => b.coins - a.coins);
+            
+            document.getElementById('res-top').innerHTML = sorted.slice(0, 3).map((p, i) => 
+                `<div class="rank-item"><span><b>${i+1}.</b> ${mode==='group'?'組別':'學號'} ${p.id}</span> <span>💰 ${p.coins}</span></div>`).join('');
 
-        let stay = participants.filter(p => p.coins === startCoins).map(p => p.id);
-        document.getElementById('res-stay').innerText = stay.length ? stay.join(', ') : '無';
+            let stay = participants.filter(p => p.coins === startCoins).map(p => p.id);
+            document.getElementById('res-stay').innerText = stay.length ? stay.join(', ') : '無人佛系';
 
-        let broke = participants.filter(p => p.coins <= 0).map(p => p.id);
-        document.getElementById('res-broke').innerText = broke.length ? broke.join(', ') : '無';
+            let broke = participants.filter(p => p.coins <= 0).map(p => p.id);
+            document.getElementById('res-broke').innerText = broke.length ? broke.join(', ') : '無人破產，大家都很棒！';
 
-        document.getElementById('res-qs').innerHTML = usedQs.map((it, i) => `${i+1}. ${it.q}<br>👉 ${it.a}`).join('<hr>');
+            document.getElementById('res-qs').innerHTML = usedQs.map((it, i) => `<b>Q${i+1}.</b> ${it.q}<br><span style="color:var(--velvet)">👉 ${it.a}</span>`).join('<hr style="border-top:1px dashed #ccc; margin:10px 0;">');
+        }
     }
 </script>
 </body>
