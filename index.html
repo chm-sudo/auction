@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>豪華拍賣行 - 完美滿版</title>
+    <title>豪華拍賣行 - 終極滿版 (支援40人)</title>
     <style>
         :root {
             --velvet: #800020;
@@ -12,15 +12,15 @@
             --marble: #FDFBF7;
         }
 
-        /* 全局防呆設定：禁止雙擊放大、禁止反白選取 */
+        /* 全局防呆設定 */
         * {
             box-sizing: border-box;
-            touch-action: manipulation; /* 解決 iPad 雙擊放大的關鍵 */
+            touch-action: manipulation;
             user-select: none; 
             -webkit-user-select: none;
         }
 
-        /* 鎖定全螢幕 100vh */
+        /* 鎖定全螢幕 100vh，絕對不准滾動 */
         html, body {
             margin: 0; padding: 0;
             width: 100vw; height: 100vh;
@@ -31,7 +31,7 @@
             flex-direction: column;
         }
 
-        /* ---------------- Setup ---------------- */
+        /* ---------------- 設定頁面 ---------------- */
         #setup-screen {
             position: fixed; inset: 0; background: white; z-index: 9999;
             display: flex; align-items: center; justify-content: center;
@@ -39,66 +39,71 @@
         .setup-box {
             width: 90%; max-width: 450px; padding: 30px;
             border: 4px solid var(--gold); border-radius: 15px; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         .setup-row { margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: bold;}
         .setup-input { width: 80px; font-size: 1.5rem; text-align: center; border: 2px solid var(--gold); border-radius: 5px; color: var(--velvet); font-weight: bold;}
 
-        /* ---------------- 上方題目與控制區 (自適應高度) ---------------- */
+        /* ---------------- 上方題目與控制區 ---------------- */
         #top-panel {
             background: linear-gradient(to bottom, var(--velvet), #5a0016);
             color: white; border-bottom: 4px solid var(--gold);
-            padding: 10px; text-align: center;
-            flex-shrink: 0; /* 確保題目區不會被壓縮消失 */
+            padding: 8px; text-align: center;
+            flex-shrink: 0; /* 保證題目區不會被下方擠壓消失 */
+            max-height: 35vh; /* 限制最高高度 */
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         
-        #q-text { font-size: 1.8rem; font-weight: bold; margin-bottom: 5px; line-height: 1.3; }
-        #q-ans { font-size: 1.4rem; color: var(--gold); margin-bottom: 10px; display: none; font-weight: bold; }
+        #q-text { font-size: 1.6rem; font-weight: bold; margin-bottom: 5px; line-height: 1.3; }
+        #q-ans { font-size: 1.3rem; color: var(--gold); margin-bottom: 8px; display: none; font-weight: bold; }
         
-        /* 統一放在題目下方的按鈕列 */
-        .top-controls {
-            display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; width: 100%;
-        }
+        .top-controls { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; width: 100%; }
 
         .btn {
-            padding: 8px 15px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;
-            box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+            padding: 8px 15px; font-size: 1.1rem; font-weight: bold; border-radius: 6px; border: none; cursor: pointer;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.3);
         }
-        .btn:active { transform: translateY(3px); box-shadow: none; }
+        .btn:active { transform: translateY(2px); box-shadow: none; }
         .btn-gold { background: var(--gold); color: var(--wood); }
         .btn-light { background: white; color: var(--velvet); }
         .btn-dark { background: #333; color: white; }
 
         /* ---------------- 主計分區 (佔滿剩餘空間) ---------------- */
         #game-screen {
-            flex-grow: 1; /* 佔據所有剩下的空間 */
-            padding: 8px;
+            flex-grow: 1; 
+            min-height: 0; /* 讓 Flexbox 允許往內收縮的關鍵語法 */
+            padding: 6px;
             display: flex;
-            overflow: hidden;
         }
         
         #participants-grid {
-            display: grid; width: 100%; height: 100%; gap: 6px;
+            display: grid; width: 100%; height: 100%; gap: 4px;
+            min-height: 0;
         }
 
         .card {
-            background: white; border: 2px solid var(--wood); border-radius: 8px;
+            background: white; border: 2px solid var(--wood); border-radius: 6px;
             display: flex; flex-direction: column; justify-content: space-between;
-            padding: 4px; overflow: hidden; box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+            padding: 4px; overflow: hidden; box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+            min-height: 0; /* 允許卡片被極度壓縮 */
         }
-        .card-name { font-weight: bold; color: var(--wood); text-align: center; border-bottom: 1px solid #eee; padding-bottom: 2px;}
-        .card-coins { font-weight: bold; color: var(--velvet); text-align: center; display: flex; align-items: center; justify-content: center; gap: 5px; flex-grow: 1;}
         
-        .btn-row { display: flex; gap: 4px; height: 35px; margin-bottom: 4px;}
-        .btn-action { 
-            flex: 1; border: 1px solid rgba(0,0,0,0.1); border-radius: 5px; font-weight: bold; font-size: 1rem;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .card-name { font-weight: bold; color: var(--wood); text-align: center; border-bottom: 1px solid #eee; padding-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .card-coins { font-weight: bold; color: var(--velvet); text-align: center; display: flex; align-items: center; justify-content: center; gap: 2px; flex-grow: 1; min-height: 0;}
+        
+        /* 一般佈局 (人數少時) */
+        .layout-normal .action-area { display: flex; flex-direction: column; gap: 4px; }
+        .layout-normal .btn-row { display: flex; gap: 4px; flex-grow: 1; }
+        .layout-normal .btn-action { flex: 1; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; font-weight: bold; font-size: 1rem; display: flex; align-items: center; justify-content: center; padding: 6px 0;}
+        .layout-normal .btn-minus { width: 100%; font-size: 0.9rem; padding: 4px 0;}
+        
+        /* 極致壓縮佈局 (人數大於 24 人時觸發) */
+        .layout-compact .action-area { display: flex; flex-direction: row; gap: 2px; height: 32px; }
+        .layout-compact .btn-action { flex: 1; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; padding: 0;}
+
+        /* 按鈕顏色 */
         .btn-plus { background: #E8F5E9; color: #2E7D32; }
-        .btn-minus { background: var(--velvet); color: white; width: 100%; height: 30px; font-size: 0.9rem; }
-        
-        .btn-action:active { filter: brightness(0.9); }
+        .btn-minus { background: var(--velvet); color: white; }
+        .btn-action:active { filter: brightness(0.8); }
 
         /* ---------------- 結算畫面 ---------------- */
         #summary-screen {
@@ -106,7 +111,7 @@
             display: none; padding: 20px; overflow-y: auto;
         }
         .sec { margin-bottom: 15px; padding: 15px; background: white; border-radius: 10px; border: 2px solid var(--gold); }
-        .rank-item { font-size: 1.3rem; border-bottom: 1px dashed #ccc; padding: 8px 0; display: flex; justify-content: space-between; }
+        .rank-item { font-size: 1.2rem; border-bottom: 1px dashed #ccc; padding: 8px 0; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
@@ -123,7 +128,7 @@
         </div>
         <div class="setup-row">
             <span>數量：</span>
-            <input type="number" id="count-in" class="setup-input" value="6" min="1" max="42">
+            <input type="number" id="count-in" class="setup-input" value="39" min="1" max="42">
         </div>
         <div class="setup-row">
             <span>起始金幣：</span>
@@ -132,7 +137,7 @@
         <div class="setup-row" style="justify-content: center;">
             <label style="cursor:pointer;"><input type="checkbox" id="q-toggle" checked style="transform: scale(1.5); margin-right: 10px;"> 顯示題目區域</label>
         </div>
-        <button class="btn btn-gold" style="width:100%; font-size: 1.3rem; padding: 12px; margin-top:10px;" onclick="initGame()">進入拍賣大廳</button>
+        <button class="btn btn-gold" style="width:100%; font-size: 1.3rem; padding: 12px; margin-top:10px;" onclick="initGame()">進入大廳</button>
     </div>
 </div>
 
@@ -141,7 +146,6 @@
         <div id="q-text">準備開始...</div>
         <div id="q-ans"></div>
     </div>
-    
     <div class="top-controls">
         <button id="btn-ans" class="btn btn-gold" onclick="showAns()">公佈答案</button>
         <button id="btn-next" class="btn btn-light" onclick="nextQ()">下一題 <span id="q-num" style="font-size:0.9rem; color:#888;">(0/17)</span></button>
@@ -157,10 +161,10 @@
     <div style="max-width: 700px; margin: 0 auto;">
         <h1 style="text-align:center; color:var(--velvet);">拍賣結算報告</h1>
         <div class="sec"><h2>🏆 最終排行榜 (前三名)</h2><div id="res-top"></div></div>
-        <div class="sec"><h2>⚖️ 資產無變動者</h2><div id="res-stay" style="font-size: 1.2rem; color: #555;"></div></div>
-        <div class="sec"><h2>💸 破產名單</h2><div id="res-broke" style="font-size: 1.2rem; color: red; font-weight: bold;"></div></div>
-        <div class="sec"><h2>📜 本日題目總結</h2><div id="res-qs" style="font-size: 1rem; line-height: 1.6;"></div></div>
-        <button class="btn btn-gold" style="width:100%; padding: 15px; font-size: 1.2rem;" onclick="location.reload()">重新開始新局</button>
+        <div class="sec"><h2>⚖️ 資產無變動者</h2><div id="res-stay" style="font-size: 1.1rem; color: #555;"></div></div>
+        <div class="sec"><h2>💸 破產名單</h2><div id="res-broke" style="font-size: 1.1rem; color: red; font-weight: bold;"></div></div>
+        <div class="sec"><h2>📜 本日題目總結</h2><div id="res-qs" style="font-size: 0.9rem; line-height: 1.6;"></div></div>
+        <button class="btn btn-gold" style="width:100%; padding: 15px; font-size: 1.2rem;" onclick="location.reload()">重新開始</button>
     </div>
 </div>
 
@@ -206,7 +210,6 @@
 
         for(let i=1; i<=count; i++) participants.push({ id: i, coins: startCoins });
 
-        // 如果不顯示題目，隱藏題目文字區塊，但保留結束按鈕
         if(!showQ) {
             document.getElementById('q-area').style.display = 'none';
             document.getElementById('btn-ans').style.display = 'none';
@@ -222,7 +225,9 @@
         grid.innerHTML = '';
         const n = participants.length;
         
-        // 智能計算行列 (完美撐滿畫面)
+        // 人數大於 24 時觸發「極致壓縮模式」
+        const isCompact = n > 24;
+        
         let cols, rows;
         if (n <= 6) { cols = 3; rows = 2; }
         else if (n <= 12) { cols = 4; rows = 3; }
@@ -233,23 +238,34 @@
         grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
         grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
-        // 依據數量調整字體
-        let nameSize = n > 20 ? "0.9rem" : "1.2rem";
-        let coinSize = n > 20 ? "1.5rem" : "2.5rem";
+        // 依據是否為壓縮模式調整字體
+        let nameSize = isCompact ? "0.85rem" : "1.2rem";
+        let coinSize = isCompact ? "1.2rem" : "2.2rem";
 
         participants.forEach((p, idx) => {
             const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div class="card-name" style="font-size:${nameSize}">${mode === 'group' ? '第'+p.id+'組' : p.id+'號'}</div>
-                <div class="card-coins" style="font-size:${coinSize}">💰 ${p.coins}</div>
-                <div>
+            card.className = isCompact ? 'card layout-compact' : 'card layout-normal';
+            
+            let actionHTML = isCompact ? `
+                <div class="action-area">
+                    <button class="btn-action btn-plus" onclick="mod(${idx}, 5)">+5</button>
+                    <button class="btn-action btn-plus" onclick="mod(${idx}, 10)">+10</button>
+                    <button class="btn-action btn-minus" onclick="mod(${idx}, -1)">-1</button>
+                </div>
+            ` : `
+                <div class="action-area">
                     <div class="btn-row">
                         <button class="btn-action btn-plus" onclick="mod(${idx}, 5)">+5</button>
                         <button class="btn-action btn-plus" onclick="mod(${idx}, 10)">+10</button>
                     </div>
                     <button class="btn-action btn-minus" onclick="mod(${idx}, -1)">扣 1 幣</button>
                 </div>
+            `;
+
+            card.innerHTML = `
+                <div class="card-name" style="font-size:${nameSize}">${mode === 'group' ? '第'+p.id+'組' : p.id+'號'}</div>
+                <div class="card-coins" style="font-size:${coinSize}">💰 ${p.coins}</div>
+                ${actionHTML}
             `;
             grid.appendChild(card);
         });
