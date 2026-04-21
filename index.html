@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>豪華拍賣行 - 最終修正版</title>
+    <title>豪華拍賣行 - 順序鑑定版</title>
     <style>
         :root {
             --velvet: #800020;
@@ -176,6 +176,7 @@
     let usedQs = [];
     let showQ = true;
 
+    // 題目清單：嚴格按此順序顯示
     const db = [
         { q: "「你走先。」", a: "贗品。語序錯誤，規範應為：你先走。" },
         { q: "「我給錢他。」", a: "贗品。語序錯誤，規範應為：我給他錢。" },
@@ -223,7 +224,7 @@
         { q: "「扳手腕」", a: "贗品。混淆動詞。正確規範應為：掰腕子。" },
         { q: "「憋不住」", a: "贗品。語法搭配生硬。正確規範應為：憋不住氣/忍不住。" },
         { q: "「不搭理他」", a: "贗品。字面陷阱。正確規範應為：不理他。" }
-    ]; // 確保題目列表完整閉合
+    ];
 
     function setMode(m) {
         mode = m;
@@ -319,7 +320,7 @@
             document.getElementById('res-stay').innerText = participants.filter(p => p.coins === startCoins).map(p => p.id).join(', ') || '無';
             document.getElementById('res-broke').innerText = participants.filter(p => p.coins <= 0).map(p => p.id).join(', ') || '無';
 
-            document.getElementById('res-qs').innerHTML = usedQs.map((it, i) => `<b>Q${i+1}.</b> ${it.q} -> ${it.a}`).join('<br>');
+            document.getElementById('res-qs').innerHTML = usedQs.map((it, i) => `<b>Q${i+1}.</b> ${it.q}<br><span style="color:var(--velvet)">👉 ${it.a}</span>`).join('<hr style="border-top:1px dashed #ccc; margin:10px 0;">');
         }
     }
 </script>
