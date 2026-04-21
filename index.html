@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>豪華拍賣行 - 防擋滿版 (支援40人)</title>
+    <title>豪華拍賣行 - 最終修正版</title>
     <style>
         :root {
             --velvet: #800020;
@@ -20,13 +20,11 @@
             -webkit-user-select: none;
         }
 
-        /* 鎖定全螢幕，使用 dvh 解決 Safari 網址列擋住畫面的問題 */
         html, body {
             margin: 0; padding: 0;
             width: 100%; 
-            height: 100%; /* 備用 */
-            height: 100dvh; /* 動態視窗高度，完美貼合實際可見區域 */
-            position: fixed; /* 將整個畫面強制釘在可視區 */
+            height: 100dvh; 
+            position: fixed; 
             top: 0; left: 0; right: 0; bottom: 0;
             overflow: hidden;
             background-color: var(--marble);
@@ -51,12 +49,11 @@
         #top-panel {
             background: linear-gradient(to bottom, var(--velvet), #5a0016);
             color: white; border-bottom: 4px solid var(--gold);
-            /* 加入 env(safe-area-inset-top) 避開瀏海或頂部狀態列 */
             padding: max(8px, env(safe-area-inset-top)) 8px 8px 8px; 
             text-align: center;
             flex-shrink: 0; 
             max-height: 40dvh; 
-            overflow-y: auto; /* 如果題目真的太長，允許在框內微幅滑動 */
+            overflow-y: auto;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         
@@ -74,11 +71,11 @@
         .btn-light { background: white; color: var(--velvet); }
         .btn-dark { background: #333; color: white; }
 
-        /* ---------------- 主計分區 (佔滿剩餘空間) ---------------- */
+        /* ---------------- 主計分區 ---------------- */
         #game-screen {
             flex-grow: 1; 
             min-height: 0; 
-            padding: max(6px, env(safe-area-inset-bottom)); /* 底部安全距離 */
+            padding: max(6px, env(safe-area-inset-bottom)); 
             display: flex;
         }
         
@@ -97,17 +94,13 @@
         .card-name { font-weight: bold; color: var(--wood); text-align: center; border-bottom: 1px solid #eee; padding-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .card-coins { font-weight: bold; color: var(--velvet); text-align: center; display: flex; align-items: center; justify-content: center; gap: 2px; flex-grow: 1; min-height: 0;}
         
-        /* 一般佈局 (人數少時) */
         .layout-normal .action-area { display: flex; flex-direction: column; gap: 4px; }
         .layout-normal .btn-row { display: flex; gap: 4px; flex-grow: 1; }
         .layout-normal .btn-action { flex: 1; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; font-weight: bold; font-size: 1rem; display: flex; align-items: center; justify-content: center; padding: 6px 0;}
-        .layout-normal .btn-minus { width: 100%; font-size: 0.9rem; padding: 4px 0;}
         
-        /* 極致壓縮佈局 (人數大於 24 人時觸發) */
         .layout-compact .action-area { display: flex; flex-direction: row; gap: 2px; height: 32px; }
         .layout-compact .btn-action { flex: 1; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; padding: 0;}
 
-        /* 按鈕顏色 */
         .btn-plus { background: #E8F5E9; color: #2E7D32; }
         .btn-minus { background: var(--velvet); color: white; }
         .btn-action:active { filter: brightness(0.8); }
@@ -183,7 +176,6 @@
     let usedQs = [];
     let showQ = true;
 
-    // 已更新為終極鑑定題庫共 46 題
     const db = [
         { q: "「你走先。」", a: "贗品。語序錯誤，規範應為：你先走。" },
         { q: "「我給錢他。」", a: "贗品。語序錯誤，規範應為：我給他錢。" },
@@ -210,7 +202,7 @@
         { q: "「雪條」", a: "贗品。詞彙錯誤，規範應為：冰棒/冰棍兒。" },
         { q: "「食滯」", a: "贗品。詞彙錯誤，規範應為：吃膩了/吃撐了。" },
         { q: "「打毛衣」", a: "真品。地道普通話動詞搭配。" },
-        { q: "「髮卡」", a: "真品。規範用詞（注意讀音為 fà qiǎ）。" },
+        { q: "「髮卡」", a: "真品。規範用詞（音：fa qia）。" },
         { q: "「高領套頭毛衣」", a: "真品。規範服飾名稱。" },
         { q: "「一眨眼」", a: "真品。規範時間副詞。" },
         { q: "「我以為是呢。」", a: "真品。地道語氣詞搭配。" },
@@ -231,27 +223,23 @@
         { q: "「扳手腕」", a: "贗品。混淆動詞。正確規範應為：掰腕子。" },
         { q: "「憋不住」", a: "贗品。語法搭配生硬。正確規範應為：憋不住氣/忍不住。" },
         { q: "「不搭理他」", a: "贗品。字面陷阱。正確規範應為：不理他。" }
-    ].sort(() => Math.random() - 0.5);
+    ]; // 確保題目列表完整閉合
 
     function setMode(m) {
         mode = m;
         document.getElementById('m1').className = m === 'group' ? 'btn btn-gold' : 'btn btn-light';
         document.getElementById('m2').className = m === 'individual' ? 'btn btn-gold' : 'btn btn-light';
-        if(m === 'individual') document.getElementById('m1').style.border = "1px solid #ccc";
     }
 
     function initGame() {
         const count = parseInt(document.getElementById('count-in').value);
         startCoins = parseInt(document.getElementById('coin-in').value);
         showQ = document.getElementById('q-toggle').checked;
-
+        
+        participants = [];
         for(let i=1; i<=count; i++) participants.push({ id: i, coins: startCoins });
 
-        if(!showQ) {
-            document.getElementById('q-area').style.display = 'none';
-            document.getElementById('btn-ans').style.display = 'none';
-            document.getElementById('btn-next').style.display = 'none';
-        }
+        if(!showQ) document.getElementById('top-panel').style.display = 'none';
 
         document.getElementById('setup-screen').style.display = 'none';
         renderGrid();
@@ -261,47 +249,36 @@
         const grid = document.getElementById('participants-grid');
         grid.innerHTML = '';
         const n = participants.length;
-        
         const isCompact = n > 24;
         
-        let cols, rows;
-        if (n <= 6) { cols = 3; rows = 2; }
-        else if (n <= 12) { cols = 4; rows = 3; }
-        else if (n <= 20) { cols = 5; rows = 4; }
-        else if (n <= 30) { cols = 6; rows = 5; }
-        else { cols = 7; rows = Math.ceil(n/7); }
+        let cols = (n <= 6) ? 3 : (n <= 12) ? 4 : (n <= 20) ? 5 : (n <= 30) ? 6 : 7;
+        let rows = Math.ceil(n / cols);
 
         grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
         grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-
-        let nameSize = isCompact ? "0.85rem" : "1.2rem";
-        let coinSize = isCompact ? "1.2rem" : "2.2rem";
 
         participants.forEach((p, idx) => {
             const card = document.createElement('div');
             card.className = isCompact ? 'card layout-compact' : 'card layout-normal';
             
-            let actionHTML = isCompact ? `
+            let actions = isCompact ? `
                 <div class="action-area">
                     <button class="btn-action btn-plus" onclick="mod(${idx}, 5)">+5</button>
                     <button class="btn-action btn-plus" onclick="mod(${idx}, 10)">+10</button>
                     <button class="btn-action btn-minus" onclick="mod(${idx}, -1)">-1</button>
-                </div>
-            ` : `
+                </div>` : `
                 <div class="action-area">
                     <div class="btn-row">
                         <button class="btn-action btn-plus" onclick="mod(${idx}, 5)">+5</button>
                         <button class="btn-action btn-plus" onclick="mod(${idx}, 10)">+10</button>
                     </div>
-                    <button class="btn-action btn-minus" onclick="mod(${idx}, -1)">扣 1 幣</button>
-                </div>
-            `;
+                    <button class="btn-action btn-minus" onclick="mod(${idx}, -1)" style="width:100%; font-size:0.9rem; padding:4px 0;">扣 1 幣</button>
+                </div>`;
 
             card.innerHTML = `
-                <div class="card-name" style="font-size:${nameSize}">${mode === 'group' ? '第'+p.id+'組' : p.id+'號'}</div>
-                <div class="card-coins" style="font-size:${coinSize}">💰 ${p.coins}</div>
-                ${actionHTML}
-            `;
+                <div class="card-name">${mode === 'group' ? '第'+p.id+'組' : p.id+'號'}</div>
+                <div class="card-coins">💰 ${p.coins}</div>
+                ${actions}`;
             grid.appendChild(card);
         });
     }
@@ -319,8 +296,7 @@
             document.getElementById('q-num').innerText = `(${currentQ + 1}/${db.length})`;
             usedQs.push(db[currentQ]);
         } else {
-            document.getElementById('q-text').innerText = "拍賣品已全部售罄";
-            document.getElementById('btn-next').disabled = true;
+            document.getElementById('q-text').innerText = "拍賣品已售罄";
         }
     }
 
@@ -332,4 +308,20 @@
     }
 
     function endGame() {
-        if(confirm("確定
+        if(confirm("確定要結算嗎？")) {
+            const summary = document.getElementById('summary-screen');
+            summary.style.display = 'block';
+            let sorted = [...participants].sort((a,b) => b.coins - a.coins);
+            
+            document.getElementById('res-top').innerHTML = sorted.slice(0, 3).map((p, i) => 
+                `<div class="rank-item"><span><b>${i+1}.</b> ${p.id}號</span> <span>💰 ${p.coins}</span></div>`).join('');
+
+            document.getElementById('res-stay').innerText = participants.filter(p => p.coins === startCoins).map(p => p.id).join(', ') || '無';
+            document.getElementById('res-broke').innerText = participants.filter(p => p.coins <= 0).map(p => p.id).join(', ') || '無';
+
+            document.getElementById('res-qs').innerHTML = usedQs.map((it, i) => `<b>Q${i+1}.</b> ${it.q} -> ${it.a}`).join('<br>');
+        }
+    }
+</script>
+</body>
+</html>
